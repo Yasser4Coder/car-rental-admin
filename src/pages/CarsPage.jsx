@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import { IconPlus } from '../components/icons';
 import api from '../api/client';
+import { useToast } from '../context/ToastContext';
 import { CAR_TYPES, formatApiError, getTypeLabel } from '../data/fleet';
 import { resolveMediaUrl } from '../utils/media';
 
 const PAGE_SIZE = 50;
 
 export default function CarsPage() {
+  const toast = useToast();
   const [cars, setCars] = useState([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, totalPages: 1 });
   const [q, setQ] = useState('');
@@ -75,12 +77,15 @@ export default function CarsPage() {
   };
 
   const remove = async (car) => {
-    if (!window.confirm(`Delete or deactivate ${car.name}?`)) return;
+    if (!window.confirm(`Delete ${car.name}? Photos will be removed from the server.`)) return;
     try {
-      await api.delete(`/admin/cars/${car.id}`);
+      const res = await api.delete(`/admin/cars/${car.id}`);
+      toast.success(res.message || 'Car deleted');
       load(page);
     } catch (err) {
-      setError(formatApiError(err));
+      const msg = formatApiError(err);
+      setError(msg);
+      toast.error(msg);
     }
   };
 
