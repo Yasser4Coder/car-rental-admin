@@ -8,6 +8,7 @@ import {
   IconDashboard,
   IconLogout,
   IconMenu,
+  IconPayments,
   IconUsers,
 } from './icons';
 
@@ -15,6 +16,7 @@ const links = [
   { to: '/', label: 'Dashboard', end: true, icon: IconDashboard, hint: 'Overview & stats' },
   { to: '/cars', label: 'Fleet', end: false, icon: IconCars, hint: 'Inventory & photos' },
   { to: '/bookings', label: 'Bookings', end: false, icon: IconBookings, hint: 'Requests & status' },
+  { to: '/payments', label: 'Payments', end: false, icon: IconPayments, hint: 'Cash & Stripe' },
   { to: '/users', label: 'Users', end: false, icon: IconUsers, hint: 'Clients & admins' },
 ];
 
@@ -23,6 +25,7 @@ function pageTitle(pathname) {
   if (pathname.startsWith('/cars/') && pathname !== '/cars') return 'Edit car';
   if (pathname.startsWith('/cars')) return 'Fleet';
   if (pathname.startsWith('/bookings')) return 'Bookings';
+  if (pathname.startsWith('/payments')) return 'Payments';
   if (pathname.startsWith('/users')) return 'Users';
   return 'Dashboard';
 }

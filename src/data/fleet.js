@@ -33,6 +33,26 @@ export const STATUS_TRANSITIONS = {
 
 export const BOOKING_STATUSES = Object.keys(STATUS_TRANSITIONS);
 
+export const BOOKING_PAYMENT_STATUSES = [
+  { value: 'unpaid', label: 'Unpaid' },
+  { value: 'deposit_held', label: 'Deposit held' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'refunded', label: 'Refunded' },
+];
+
+export function paymentStatusLabel(value) {
+  return (
+    BOOKING_PAYMENT_STATUSES.find((item) => item.value === value)?.label ||
+    String(value || 'unpaid').replace(/_/g, ' ')
+  );
+}
+
+export function formatMoneyAed(amount) {
+  const n = Number(amount);
+  if (!Number.isFinite(n)) return 'AED —';
+  return `AED ${n.toLocaleString('en-AE')}`;
+}
+
 export function getLocationLabel(value) {
   return LOCATIONS.find((item) => item.value === value)?.label || value || '—';
 }

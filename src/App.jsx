@@ -7,6 +7,7 @@ import CarFormPage from './pages/CarFormPage';
 import CarsPage from './pages/CarsPage';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
+import PaymentsPage from './pages/PaymentsPage';
 import UsersPage from './pages/UsersPage';
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
               <Route path="cars/new" element={<CarFormPage />} />
               <Route path="cars/:id" element={<CarFormPage />} />
               <Route path="bookings" element={<BookingsPage />} />
+              <Route path="payments" element={<PaymentsPage />} />
               <Route path="users" element={<UsersPage />} />
             </Route>
           </Route>

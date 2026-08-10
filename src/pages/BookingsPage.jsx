@@ -3,11 +3,26 @@ import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import api from '../api/client';
 import {
+  BOOKING_PAYMENT_STATUSES,
   BOOKING_STATUSES,
   STATUS_TRANSITIONS,
   formatApiError,
   getLocationLabel,
+  paymentStatusLabel,
 } from '../data/fleet';
+
+function asStatusHistory(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
 
 export default function BookingsPage() {
   const [bookings, setBookings] = useState([]);
@@ -15,8 +30,10 @@ export default function BookingsPage() {
   const [status, setStatus] = useState('');
   const [q, setQ] = useState('');
   const [note, setNote] = useState('');
+  const [paymentNote, setPaymentNote] = useState('');
   const [error, setError] = useState('');
   const [nextStatus, setNextStatus] = useState('');
+  const [nextPaymentStatus, setNextPaymentStatus] = useState('paid');
 
   const allowedNext = useMemo(() => {
     if (!selected) return [];
@@ -49,6 +66,10 @@ export default function BookingsPage() {
       const res = await api.get(`/admin/bookings/${id}`);
       setSelected(res.data);
       setNote('');
+      setPaymentNote('');
+      setNextPaymentStatus(
+        res.data.paymentStatus === 'unpaid' ? 'paid' : res.data.paymentStatus || 'paid',
+      );
     } catch (err) {
       setError(formatApiError(err));
     }
@@ -62,6 +83,21 @@ export default function BookingsPage() {
         note: note || null,
       });
       setSelected(res.data);
+      load();
+    } catch (err) {
+      setError(formatApiError(err));
+    }
+  };
+
+  const changePaymentStatus = async () => {
+    if (!selected || !nextPaymentStatus) return;
+    try {
+      const res = await api.patch(`/admin/bookings/${selected.id}/payment-status`, {
+        paymentStatus: nextPaymentStatus,
+        note: paymentNote || null,
+      });
+      setSelected(res.data);
+      setPaymentNote('');
       load();
     } catch (err) {
       setError(formatApiError(err));
@@ -136,7 +172,12 @@ export default function BookingsPage() {
                   </td>
                   <td>{getLocationLabel(b.location)}</td>
                   <td>
-                    <span className={`admin-status admin-status--${b.status}`}>{b.status}</span>
+                    <div className="admin-chip-row">
+                      <span className={`admin-status admin-status--${b.status}`}>{b.status}</span>
+                      <span className={`admin-status admin-status--${b.paymentStatus || 'unpaid'}`}>
+                        {paymentStatusLabel(b.paymentStatus)}
+                      </span>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -161,8 +202,13 @@ export default function BookingsPage() {
                   {selected.code}
                 </p>
                 <h3 className="text-xl font-bold text-primary">{selected.car?.name}</h3>
-                <p className="mt-2">
+                <p className="mt-2 flex flex-wrap items-center gap-2">
                   <span className={`admin-status admin-status--${selected.status}`}>{selected.status}</span>
+                  <span
+                    className={`admin-status admin-status--${selected.paymentStatus || 'unpaid'}`}
+                  >
+                    {paymentStatusLabel(selected.paymentStatus)}
+                  </span>
                 </p>
               </div>
 
@@ -199,7 +245,42 @@ export default function BookingsPage() {
                   <dt className="text-on-surface-variant">Total</dt>
                   <dd className="font-semibold text-secondary">AED {selected.total}</dd>
                 </div>
+                <div>
+                  <dt className="text-on-surface-variant">Payment</dt>
+                  <dd className="font-semibold capitalize">
+                    {paymentStatusLabel(selected.paymentStatus)}
+                  </dd>
+                </div>
+                {selected.stripePaymentIntentId && (
+                  <div className="col-span-2">
+                    <dt className="text-on-surface-variant">Stripe PI</dt>
+                    <dd className="font-mono text-xs break-all">{selected.stripePaymentIntentId}</dd>
+                  </div>
+                )}
               </dl>
+
+              {Array.isArray(selected.payments) && selected.payments.length > 0 && (
+                <div>
+                  <h4 className="font-bold">Stripe attempts</h4>
+                  <ul className="mt-2 space-y-2 text-sm">
+                    {selected.payments.map((p) => (
+                      <li key={p.id} className="rounded-lg border border-black/8 p-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className={`admin-status admin-status--stripe-${p.status}`}>
+                            {String(p.status).replace(/_/g, ' ')}
+                          </span>
+                          <span className="font-semibold">AED {p.amount}</span>
+                        </div>
+                        {p.stripePaymentIntentId && (
+                          <p className="mt-1 font-mono text-[11px] break-all text-on-surface-variant">
+                            {p.stripePaymentIntentId}
+                          </p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {selected.notes && (
                 <p className="rounded-xl bg-surface-container p-3 text-sm">
@@ -210,18 +291,50 @@ export default function BookingsPage() {
               <div>
                 <h4 className="font-bold">Status history</h4>
                 <ul className="mt-2 space-y-2 text-sm">
-                  {(selected.statusHistory || []).map((item, idx) => (
-                    <li key={`${item.at}-${idx}`} className="rounded-lg border border-black/8 p-2">
+                  {asStatusHistory(selected.statusHistory).map((item, idx) => (
+                    <li key={`${item?.at || 'h'}-${idx}`} className="rounded-lg border border-black/8 p-2">
                       <p className="font-semibold capitalize">
                         {item.from || '—'} → {item.to}
                       </p>
                       <p className="text-on-surface-variant">
-                        {item.by} · {new Date(item.at).toLocaleString()}
+                        {item.by} · {item.at ? new Date(item.at).toLocaleString() : '—'}
                       </p>
                       {item.note && <p>{item.note}</p>}
                     </li>
                   ))}
                 </ul>
+              </div>
+
+              <div className="space-y-2 border-t border-black/8 pt-4">
+                <h4 className="font-bold">Update payment</h4>
+                <select
+                  value={nextPaymentStatus}
+                  onChange={(e) => setNextPaymentStatus(e.target.value)}
+                  className="w-full rounded-xl border border-black/10 bg-surface px-3 py-2.5 capitalize"
+                >
+                  {BOOKING_PAYMENT_STATUSES.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+                <textarea
+                  value={paymentNote}
+                  onChange={(e) => setPaymentNote(e.target.value)}
+                  placeholder="Optional payment note (cash, bank transfer…)"
+                  className="min-h-16 w-full rounded-xl border border-black/10 bg-surface px-3 py-2.5"
+                />
+                <button
+                  type="button"
+                  onClick={changePaymentStatus}
+                  disabled={nextPaymentStatus === (selected.paymentStatus || 'unpaid')}
+                  className="admin-btn admin-btn--primary w-full"
+                >
+                  Apply payment status
+                </button>
+                <Link to="/payments" className="block text-center text-sm font-semibold text-secondary">
+                  Open payments workspace
+                </Link>
               </div>
 
               <div className="space-y-2 border-t border-black/8 pt-4">

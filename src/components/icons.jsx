@@ -74,6 +74,16 @@ export function IconUsers({ className }) {
   );
 }
 
+export function IconPayments({ className }) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="3" y="6" width="18" height="12" rx="2" />
+      <path d="M3 10h18" strokeLinecap="round" />
+      <path d="M7 15h3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function IconPlus({ className }) {
   return (
     <svg {...base} className={className}>

@@ -528,6 +528,45 @@ body {
   color: #a11d1d;
 }
 
+.admin-status--unpaid {
+  background: #fff4d6;
+  color: #8a6200;
+}
+
+.admin-status--paid,
+.admin-status--deposit_held {
+  background: rgba(51, 107, 0, 0.12);
+  color: var(--color-secondary);
+}
+
+.admin-status--refunded {
+  background: #fde8e8;
+  color: #a11d1d;
+}
+
+.admin-status--stripe-pending,
+.admin-status--stripe-processing {
+  background: #fff4d6;
+  color: #8a6200;
+}
+
+.admin-status--stripe-succeeded {
+  background: rgba(51, 107, 0, 0.12);
+  color: var(--color-secondary);
+}
+
+.admin-status--stripe-failed,
+.admin-status--stripe-canceled {
+  background: #fde8e8;
+  color: #a11d1d;
+}
+
+.admin-status--stripe-refunded_partial,
+.admin-status--stripe-refunded_full {
+  background: #eee8ff;
+  color: #5b3cc4;
+}
+
 .login-shell {
   min-height: 100vh;
   display: grid;
