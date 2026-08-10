@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
+import PhotoUploader from '../components/PhotoUploader';
 import api from '../api/client';
+import { useToast } from '../context/ToastContext';
 import {
   CAR_TYPES,
   LOCATIONS,
@@ -98,6 +100,7 @@ export default function CarFormPage() {
   const { id } = useParams();
   const isNew = !id || id === 'new';
   const navigate = useNavigate();
+  const toast = useToast();
   const [form, setForm] = useState(empty);
   const [highlights, setHighlights] = useState('');
   const [features, setFeatures] = useState('');
@@ -107,6 +110,10 @@ export default function CarFormPage() {
   const [badgeLabel, setBadgeLabel] = useState(empty.badges[0]?.label || 'ESSENTIEL');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadPhase, setUploadPhase] = useState('upload');
+  const [uploadCount, setUploadCount] = useState(0);
 
   useEffect(() => {
     if (isNew) return;
@@ -147,14 +154,24 @@ export default function CarFormPage() {
   const selectAllLocations = () => setLocations(LOCATIONS.map((l) => l.value));
   const clearLocations = () => setLocations([]);
 
-  const setMainImage = (path) => {
-    setForm((prev) => ({ ...prev, image: toStoragePath(path) }));
+  const setMainImage = async (path) => {
+    const storage = toStoragePath(path);
+    setForm((prev) => ({ ...prev, image: storage }));
+    if (isNew) return;
+    try {
+      await api.patch(`/admin/cars/${id}`, { image: storage });
+      toast.success('Main photo updated');
+    } catch (err) {
+      toast.error(formatApiError(err));
+    }
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!locations.length) {
-      setError('Select at least one pickup area (matches website booking areas).');
+      const msg = 'Select at least one pickup area (matches website booking areas).';
+      setError(msg);
+      toast.error(msg);
       return;
     }
     setSaving(true);
@@ -193,36 +210,71 @@ export default function CarFormPage() {
 
       if (isNew) {
         const created = await api.post('/admin/cars', payload);
+        toast.success('Car created — you can upload photos now');
         navigate(`/cars/${created.data.id}`);
       } else {
         await api.patch(`/admin/cars/${id}`, payload);
+        toast.success('Car saved');
         navigate('/cars');
       }
     } catch (err) {
-      setError(formatApiError(err));
+      const msg = formatApiError(err);
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
   };
 
-  const onUpload = async (e) => {
+  const uploadFiles = async (files) => {
     if (isNew) {
-      setError('Save the car first, then upload images.');
+      toast.error('Save the car first, then upload photos');
       return;
     }
-    const files = e.target.files;
-    if (!files?.length) return;
+    setUploading(true);
+    setUploadProgress(0);
+    setUploadPhase('upload');
+    setUploadCount(files.length);
+    setError('');
     const body = new FormData();
-    [...files].forEach((file) => body.append('images', file));
+    files.forEach((file) => body.append('images', file));
     try {
-      const res = await api.post(`/admin/cars/${id}/images`, body);
+      const res = await api.upload(`/admin/cars/${id}/images`, body, {
+        onProgress: ({ percent, phase }) => {
+          setUploadProgress(percent);
+          setUploadPhase(phase === 'done' ? 'done' : phase);
+        },
+      });
       const car = normalizeCar(res.data);
       setForm(car);
-      setError('');
+      setUploadProgress(100);
+      toast.success(res.message || `${files.length} photo(s) uploaded & compressed`);
+      if (res.warnings?.length) {
+        toast.info(res.warnings[0]);
+      }
     } catch (err) {
-      setError(formatApiError(err));
+      const msg = formatApiError(err);
+      setError(msg);
+      toast.error(msg);
     } finally {
-      e.target.value = '';
+      setUploading(false);
+      setUploadProgress(0);
+      setUploadPhase('upload');
+      setUploadCount(0);
+    }
+  };
+
+  const removeImage = async (path) => {
+    if (isNew) return;
+    if (!window.confirm('Remove this photo from the car?')) return;
+    try {
+      const res = await api.delete(`/admin/cars/${id}/images`, { path });
+      setForm(normalizeCar(res.data));
+      toast.success(res.message || 'Photo removed');
+    } catch (err) {
+      const msg = formatApiError(err);
+      setError(msg);
+      toast.error(msg);
     }
   };
 
@@ -246,44 +298,59 @@ export default function CarFormPage() {
       <form onSubmit={onSubmit} className="car-form__layout">
         <div className="car-form__main">
           <div className="car-form__grid-top">
-            <Section title="Photos" description="Main image appears on cards and the fleet gallery.">
+            <Section title="Photos" description="Drag & drop or browse. Images are compressed and stored securely.">
               <div className="car-media">
                 <div className="car-media__hero">
                   <img src={previewSrc} alt="" />
-                  {!form.image && <span className="car-media__badge">Placeholder</span>}
-                </div>
-                <div className="car-media__toolbar">
-                  <p className="car-media__hint">
-                    {isNew
-                      ? 'Save once, then upload photos on the edit screen.'
-                      : 'Click a thumbnail to set it as the main photo.'}
-                  </p>
-                  {!isNew && (
-                    <label className="admin-btn admin-btn--ghost car-media__upload">
-                      Upload images
-                      <input type="file" accept="image/*" multiple className="sr-only" onChange={onUpload} />
-                    </label>
+                  {(!form.image || form.image === PENDING_IMAGE) && (
+                    <span className="car-media__badge">Placeholder</span>
                   )}
                 </div>
+
+                <PhotoUploader
+                  disabled={isNew}
+                  uploading={uploading}
+                  progress={uploadProgress}
+                  progressPhase={uploadPhase}
+                  fileCount={uploadCount}
+                  onUpload={uploadFiles}
+                />
+
                 {gallery.length > 0 && (
-                  <div className="car-media__thumbs">
-                    {gallery.map((src) => {
-                      const path = toStoragePath(src);
-                      const active = path === toStoragePath(form.image);
-                      return (
-                        <button
-                          key={path}
-                          type="button"
-                          onClick={() => setMainImage(path)}
-                          className={`car-media__thumb ${active ? 'car-media__thumb--active' : ''}`}
-                          title="Set as main image"
-                        >
-                          <img src={resolveMediaUrl(path)} alt="" />
-                        </button>
-                      );
-                    })}
+                  <div className="car-media__gallery">
+                    <p className="car-media__hint">Click a photo to set it as main · remove unused shots</p>
+                    <div className="car-media__thumbs">
+                      {gallery.map((src) => {
+                        const path = toStoragePath(src);
+                        const active = path === toStoragePath(form.image);
+                        return (
+                          <div
+                            key={path}
+                            className={`car-media__thumb-wrap ${active ? 'car-media__thumb-wrap--active' : ''}`}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => setMainImage(path)}
+                              className="car-media__thumb"
+                              title="Set as main image"
+                            >
+                              <img src={resolveMediaUrl(path)} alt="" />
+                            </button>
+                            <button
+                              type="button"
+                              className="car-media__remove"
+                              title="Remove photo"
+                              onClick={() => removeImage(path)}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
+
                 <Field label="Image alt text" hint="Used for accessibility on the website.">
                   <input
                     className={inputClass}
