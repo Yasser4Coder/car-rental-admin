@@ -91,7 +91,7 @@ export default function CarsPage() {
         description="Inventory shown on Featured Fleet, /cars, and detail pages."
         actions={
           <Link to="/cars/new" className="admin-btn admin-btn--primary">
-            <IconPlus className="h-4 w-4" />
+            <IconPlus />
             Add car
           </Link>
         }
@@ -130,73 +130,69 @@ export default function CarsPage() {
           <p className="mb-3 text-sm text-on-surface-variant">
             <span className="font-bold text-on-surface">{meta.total}</span> vehicles in catalog
           </p>
-          <div className="admin-card overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-black/8 bg-surface-container/70 text-xs uppercase tracking-widest text-on-surface-variant">
+          <div className="admin-card admin-table-wrap">
+            <table className="admin-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-3">Car</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Price</th>
-                  <th className="px-4 py-3">Flags</th>
-                  <th className="px-4 py-3">Actions</th>
+                  <th>Car</th>
+                  <th>Type</th>
+                  <th>Price</th>
+                  <th>Flags</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {cars.map((car) => (
-                  <tr key={car.id} className="border-b border-black/5 align-middle last:border-0">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
+                  <tr key={car.id}>
+                    <td>
+                      <div className="admin-table__cell-car">
                         <img
                           src={resolveMediaUrl(car.image)}
                           alt=""
-                          className="h-12 w-16 rounded-lg object-cover bg-surface-container"
+                          className="admin-table__thumb"
                         />
-                        <div>
-                          <p className="font-semibold text-primary">{car.name}</p>
-                          <p className="text-on-surface-variant">
+                        <div className="min-w-0">
+                          <p className="admin-table__primary truncate">{car.name}</p>
+                          <p className="admin-table__secondary">
                             {car.brand} · {car.year}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3">{getTypeLabel(car.type)}</td>
-                    <td className="px-4 py-3 font-semibold">AED {car.price}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {car.featured && (
-                          <span className="rounded-full bg-secondary-container/60 px-2 py-0.5 text-xs font-bold text-primary">
-                            Featured
-                          </span>
-                        )}
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                            car.isActive ? 'bg-primary/10 text-primary' : 'bg-red-100 text-red-700'
-                          }`}
-                        >
+                    <td>{getTypeLabel(car.type)}</td>
+                    <td className="admin-table__mono">AED {Number(car.price).toLocaleString('en-AE')}</td>
+                    <td>
+                      <div className="admin-chip-row">
+                        {car.featured && <span className="admin-chip admin-chip--featured">Featured</span>}
+                        <span className={`admin-chip ${car.isActive ? 'admin-chip--active' : 'admin-chip--inactive'}`}>
                           {car.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-2">
-                        <Link to={`/cars/${car.id}`} className="font-semibold text-secondary hover:underline">
+                    <td>
+                      <div className="admin-table__actions">
+                        <Link to={`/cars/${car.id}`} className="admin-table__action admin-table__action--edit">
                           Edit
                         </Link>
                         <button
                           type="button"
                           onClick={() => toggleFeatured(car)}
-                          className="font-semibold text-primary"
+                          className="admin-table__action admin-table__action--muted"
                         >
                           {car.featured ? 'Unfeature' : 'Feature'}
                         </button>
                         <button
                           type="button"
                           onClick={() => toggleActive(car)}
-                          className="font-semibold text-primary"
+                          className="admin-table__action admin-table__action--muted"
                         >
                           {car.isActive ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button type="button" onClick={() => remove(car)} className="font-semibold text-red-700">
+                        <button
+                          type="button"
+                          onClick={() => remove(car)}
+                          className="admin-table__action admin-table__action--danger"
+                        >
                           Delete
                         </button>
                       </div>
@@ -205,7 +201,7 @@ export default function CarsPage() {
                 ))}
                 {!cars.length && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-on-surface-variant">
+                    <td colSpan={5} className="admin-table__empty">
                       No cars match this filter.
                     </td>
                   </tr>

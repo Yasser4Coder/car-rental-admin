@@ -84,11 +84,11 @@ export default function DashboardPage() {
         actions={
           <>
             <Link to="/cars/new" className="admin-btn admin-btn--primary">
-              <IconPlus className="h-4 w-4" />
+              <IconPlus />
               Add car
             </Link>
             <Link to="/bookings" className="admin-btn admin-btn--ghost">
-              <IconBookings className="h-4 w-4" />
+              <IconBookings />
               Bookings
             </Link>
           </>

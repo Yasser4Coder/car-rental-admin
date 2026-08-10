@@ -103,43 +103,46 @@ export default function BookingsPage() {
       {error && <p className="mb-4 text-red-700">{error}</p>}
 
       <div className="grid gap-5 lg:grid-cols-5">
-        <div className="admin-card overflow-x-auto lg:col-span-3">
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-black/8 bg-surface-container text-xs uppercase tracking-widest text-on-surface-variant">
+        <div className="admin-card admin-table-wrap lg:col-span-3">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <th className="px-4 py-3">Code</th>
-                <th className="px-4 py-3">Client</th>
-                <th className="px-4 py-3">Car</th>
-                <th className="px-4 py-3">Dates</th>
-                <th className="px-4 py-3">Area</th>
-                <th className="px-4 py-3">Status</th>
+                <th>Code</th>
+                <th>Client</th>
+                <th>Car</th>
+                <th>Dates</th>
+                <th>Area</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {bookings.map((b) => (
                 <tr
                   key={b.id}
-                  className="cursor-pointer border-b border-black/5 hover:bg-surface-container/60"
+                  className={`is-clickable ${selected?.id === b.id ? 'is-selected' : ''}`}
                   onClick={() => openDetail(b.id)}
                 >
-                  <td className="px-4 py-3 font-semibold">{b.code}</td>
-                  <td className="px-4 py-3">
-                    <p>{b.fullName}</p>
-                    <p className="text-on-surface-variant">{b.email}</p>
+                  <td className="admin-table__mono">{b.code}</td>
+                  <td>
+                    <p className="admin-table__primary">{b.fullName}</p>
+                    <p className="admin-table__secondary truncate max-w-[11rem]">{b.email}</p>
                   </td>
-                  <td className="px-4 py-3">{b.car?.name || b.carId}</td>
-                  <td className="px-4 py-3">
-                    {b.pickupDate} → {b.returnDate}
+                  <td>
+                    <p className="admin-table__primary truncate max-w-[10rem]">{b.car?.name || b.carId}</p>
                   </td>
-                  <td className="px-4 py-3">{getLocationLabel(b.location)}</td>
-                  <td className="px-4 py-3">
+                  <td>
+                    <p className="admin-table__primary whitespace-nowrap">{b.pickupDate}</p>
+                    <p className="admin-table__secondary whitespace-nowrap">to {b.returnDate}</p>
+                  </td>
+                  <td>{getLocationLabel(b.location)}</td>
+                  <td>
                     <span className={`admin-status admin-status--${b.status}`}>{b.status}</span>
                   </td>
                 </tr>
               ))}
               {!bookings.length && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-on-surface-variant">
+                  <td colSpan={6} className="admin-table__empty">
                     No bookings found.
                   </td>
                 </tr>

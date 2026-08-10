@@ -94,7 +94,7 @@ export default function AdminLayout() {
           </div>
         </div>
         <button type="button" className="admin-logout" onClick={logout}>
-          <IconLogout className="h-4 w-4" />
+          <IconLogout />
           Sign out
         </button>
       </div>
