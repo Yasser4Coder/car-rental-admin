@@ -10,7 +10,7 @@ import {
   YAxis,
 } from 'recharts';
 import PageHeader from '../components/PageHeader';
-import { IconBookings, IconCars, IconPlus } from '../components/icons';
+import { IconBookings, IconCars, IconPlus, IconUsers } from '../components/icons';
 import api from '../api/client';
 import { formatApiError, getLocationLabel } from '../data/fleet';
 import { resolveMediaUrl } from '../utils/media';
@@ -102,7 +102,12 @@ export default function DashboardPage() {
           value={overview.bookings.month}
           hint={`${overview.bookings.today} today`}
         />
-        <StatCard label="Clients" value={overview.clients} hint="Registered accounts" />
+        <Link
+          to="/users"
+          className="no-underline"
+        >
+          <StatCard label="Clients" value={overview.clients} hint="Manage accounts →" />
+        </Link>
         <StatCard
           label="Revenue"
           value={`AED ${Number(overview.revenue).toLocaleString('en-AE')}`}
@@ -110,7 +115,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-2">
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <Link
           to="/cars"
           className="admin-card flex items-center gap-3 p-4 no-underline transition hover:border-secondary/30"
@@ -133,6 +138,18 @@ export default function DashboardPage() {
           <span>
             <span className="block font-bold text-primary">Review bookings</span>
             <span className="text-sm text-on-surface-variant">Confirm, activate, complete</span>
+          </span>
+        </Link>
+        <Link
+          to="/users"
+          className="admin-card flex items-center gap-3 p-4 no-underline transition hover:border-secondary/30"
+        >
+          <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary">
+            <IconUsers />
+          </span>
+          <span>
+            <span className="block font-bold text-primary">Manage users</span>
+            <span className="text-sm text-on-surface-variant">Clients, admins, access</span>
           </span>
         </Link>
       </div>

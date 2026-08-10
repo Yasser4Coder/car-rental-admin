@@ -63,6 +63,17 @@ export function IconLogout({ className }) {
   );
 }
 
+export function IconUsers({ className }) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M16 19v-1.2A3.8 3.8 0 0012.2 14H7.8A3.8 3.8 0 004 17.8V19" strokeLinecap="round" />
+      <circle cx="10" cy="8" r="3" />
+      <path d="M20 19v-1a3 3 0 00-2.1-2.9" strokeLinecap="round" />
+      <path d="M16.5 5.2a3 3 0 010 5.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function IconPlus({ className }) {
   return (
     <svg {...base} className={className}>

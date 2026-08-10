@@ -8,12 +8,14 @@ import {
   IconDashboard,
   IconLogout,
   IconMenu,
+  IconUsers,
 } from './icons';
 
 const links = [
   { to: '/', label: 'Dashboard', end: true, icon: IconDashboard, hint: 'Overview & stats' },
   { to: '/cars', label: 'Fleet', end: false, icon: IconCars, hint: 'Inventory & photos' },
   { to: '/bookings', label: 'Bookings', end: false, icon: IconBookings, hint: 'Requests & status' },
+  { to: '/users', label: 'Users', end: false, icon: IconUsers, hint: 'Clients & admins' },
 ];
 
 function pageTitle(pathname) {
@@ -21,6 +23,7 @@ function pageTitle(pathname) {
   if (pathname.startsWith('/cars/') && pathname !== '/cars') return 'Edit car';
   if (pathname.startsWith('/cars')) return 'Fleet';
   if (pathname.startsWith('/bookings')) return 'Bookings';
+  if (pathname.startsWith('/users')) return 'Users';
   return 'Dashboard';
 }
 
