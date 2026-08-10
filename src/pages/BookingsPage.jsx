@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import PageHeader from '../components/PageHeader';
 import api from '../api/client';
 import {
   BOOKING_STATUSES,
@@ -68,15 +69,13 @@ export default function BookingsPage() {
   };
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h2 className="text-2xl font-bold">Bookings</h2>
-        <p className="text-on-surface-variant">
-          Track client requests from the website and update status with a full history.
-        </p>
-      </div>
+    <div>
+      <PageHeader
+        title="Bookings"
+        description="Track client requests from the website and update status with a full history."
+      />
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-black/8 bg-white p-4 sm:flex-row">
+      <div className="admin-card mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -96,15 +95,15 @@ export default function BookingsPage() {
             </option>
           ))}
         </select>
-        <button type="button" onClick={load} className="min-h-11 rounded-xl bg-primary px-4 font-bold text-white">
+        <button type="button" onClick={load} className="admin-btn admin-btn--primary">
           Filter
         </button>
       </div>
 
-      {error && <p className="text-red-700">{error}</p>}
+      {error && <p className="mb-4 text-red-700">{error}</p>}
 
       <div className="grid gap-5 lg:grid-cols-5">
-        <div className="overflow-x-auto rounded-2xl border border-black/8 bg-white lg:col-span-3">
+        <div className="admin-card overflow-x-auto lg:col-span-3">
           <table className="min-w-full text-left text-sm">
             <thead className="border-b border-black/8 bg-surface-container text-xs uppercase tracking-widest text-on-surface-variant">
               <tr>
@@ -133,7 +132,9 @@ export default function BookingsPage() {
                     {b.pickupDate} → {b.returnDate}
                   </td>
                   <td className="px-4 py-3">{getLocationLabel(b.location)}</td>
-                  <td className="px-4 py-3 capitalize">{b.status}</td>
+                  <td className="px-4 py-3">
+                    <span className={`admin-status admin-status--${b.status}`}>{b.status}</span>
+                  </td>
                 </tr>
               ))}
               {!bookings.length && (
@@ -147,7 +148,7 @@ export default function BookingsPage() {
           </table>
         </div>
 
-        <div className="rounded-2xl border border-black/8 bg-white p-5 lg:col-span-2">
+        <div className="admin-card p-5 lg:col-span-2">
           {!selected ? (
             <p className="text-on-surface-variant">Select a booking to view details.</p>
           ) : (
@@ -156,8 +157,10 @@ export default function BookingsPage() {
                 <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">
                   {selected.code}
                 </p>
-                <h3 className="text-xl font-bold">{selected.car?.name}</h3>
-                <p className="text-sm text-on-surface-variant capitalize">Status: {selected.status}</p>
+                <h3 className="text-xl font-bold text-primary">{selected.car?.name}</h3>
+                <p className="mt-2">
+                  <span className={`admin-status admin-status--${selected.status}`}>{selected.status}</span>
+                </p>
               </div>
 
               <dl className="grid grid-cols-2 gap-3 text-sm">
@@ -243,11 +246,7 @@ export default function BookingsPage() {
                       placeholder="Optional note for history"
                       className="min-h-20 w-full rounded-xl border border-black/10 bg-surface px-3 py-2.5"
                     />
-                    <button
-                      type="button"
-                      onClick={changeStatus}
-                      className="w-full rounded-xl bg-primary py-3 text-sm font-bold uppercase tracking-widest text-white"
-                    >
+                    <button type="button" onClick={changeStatus} className="admin-btn admin-btn--primary w-full">
                       Apply status
                     </button>
                   </>

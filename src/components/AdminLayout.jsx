@@ -1,54 +1,143 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import {
+  IconBookings,
+  IconCars,
+  IconClose,
+  IconDashboard,
+  IconLogout,
+  IconMenu,
+} from './icons';
 
 const links = [
-  { to: '/', label: 'Dashboard', end: true },
-  { to: '/cars', label: 'Cars' },
-  { to: '/bookings', label: 'Bookings' },
+  { to: '/', label: 'Dashboard', end: true, icon: IconDashboard, hint: 'Overview & stats' },
+  { to: '/cars', label: 'Fleet', end: false, icon: IconCars, hint: 'Inventory & photos' },
+  { to: '/bookings', label: 'Bookings', end: false, icon: IconBookings, hint: 'Requests & status' },
 ];
+
+function pageTitle(pathname) {
+  if (pathname.startsWith('/cars/new')) return 'Add car';
+  if (pathname.startsWith('/cars/') && pathname !== '/cars') return 'Edit car';
+  if (pathname.startsWith('/cars')) return 'Fleet';
+  if (pathname.startsWith('/bookings')) return 'Bookings';
+  return 'Dashboard';
+}
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  return (
-    <div className="min-h-screen bg-surface">
-      <header className="border-b border-black/8 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-secondary">Green Rental</p>
-            <h1 className="text-lg font-bold text-primary">Admin Console</h1>
-          </div>
-          <nav className="flex flex-wrap items-center gap-1">
-            {links.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.end}
-                className={({ isActive }) =>
-                  `rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-                    isActive ? 'bg-primary text-white' : 'text-on-surface-variant hover:bg-surface-container'
-                  }`
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="flex items-center gap-3">
-            <span className="hidden text-sm text-on-surface-variant sm:inline">{user?.fullName}</span>
-            <button
-              type="button"
-              onClick={logout}
-              className="rounded-lg border border-primary/20 px-3 py-2 text-sm font-semibold text-primary hover:bg-surface-container"
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
+
+  const sidebar = (
+    <aside className="admin-sidebar">
+      <div className="admin-sidebar__brand">
+        <div className="admin-sidebar__mark" aria-hidden>
+          GR
+        </div>
+        <div className="min-w-0">
+          <p className="admin-sidebar__brand-kicker">Green Rental</p>
+          <p className="admin-sidebar__brand-title">Admin</p>
+        </div>
+        <button
+          type="button"
+          className="admin-sidebar__close lg:hidden"
+          aria-label="Close menu"
+          onClick={() => setMobileOpen(false)}
+        >
+          <IconClose />
+        </button>
+      </div>
+
+      <nav className="admin-sidebar__nav" aria-label="Main">
+        <p className="admin-sidebar__section">Workspace</p>
+        {links.map((link) => {
+          const Icon = link.icon;
+          return (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.end}
+              className={({ isActive }) =>
+                `admin-nav-link ${isActive ? 'admin-nav-link--active' : ''}`
+              }
             >
-              Logout
-            </button>
+              <Icon className="admin-nav-link__icon" />
+              <span className="admin-nav-link__text">
+                <span className="admin-nav-link__label">{link.label}</span>
+                <span className="admin-nav-link__hint">{link.hint}</span>
+              </span>
+            </NavLink>
+          );
+        })}
+      </nav>
+
+      <div className="admin-sidebar__footer">
+        <div className="admin-user">
+          <div className="admin-user__avatar" aria-hidden>
+            {(user?.fullName || user?.email || 'A').slice(0, 1).toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="admin-user__name truncate">{user?.fullName || 'Admin'}</p>
+            <p className="admin-user__email truncate">{user?.email}</p>
           </div>
         </div>
-      </header>
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        <Outlet />
-      </main>
+        <button type="button" className="admin-logout" onClick={logout}>
+          <IconLogout className="h-4 w-4" />
+          Sign out
+        </button>
+      </div>
+    </aside>
+  );
+
+  return (
+    <div className="admin-shell">
+      <div
+        className={`admin-overlay ${mobileOpen ? 'admin-overlay--open' : ''}`}
+        onClick={() => setMobileOpen(false)}
+        aria-hidden={!mobileOpen}
+      />
+
+      <div className={`admin-sidebar-wrap ${mobileOpen ? 'admin-sidebar-wrap--open' : ''}`}>
+        {sidebar}
+      </div>
+
+      <div className="admin-main">
+        <header className="admin-topbar">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              className="admin-icon-btn lg:hidden"
+              aria-label="Open menu"
+              onClick={() => setMobileOpen(true)}
+            >
+              <IconMenu />
+            </button>
+            <div className="min-w-0">
+              <p className="admin-topbar__eyebrow">Green Rental Experience · Dubai</p>
+              <p className="admin-topbar__title truncate">{pageTitle(location.pathname)}</p>
+            </div>
+          </div>
+          <div className="hidden items-center gap-2 sm:flex">
+            <span className="admin-pill">Live fleet</span>
+          </div>
+        </header>
+
+        <main className="admin-content">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

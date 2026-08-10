@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import PageHeader from '../components/PageHeader';
 import api from '../api/client';
 import {
   CAR_TYPES,
@@ -204,20 +205,18 @@ export default function CarFormPage() {
   const gallery = Array.isArray(form.gallery) ? form.gallery : [];
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold">{isNew ? 'Add car' : 'Edit car'}</h2>
-          <p className="text-on-surface-variant">
-            This content powers Featured Fleet and the /cars pages.
-          </p>
-        </div>
-        <Link to="/cars" className="font-semibold text-secondary hover:underline">
-          Back
-        </Link>
-      </div>
+    <div className="mx-auto max-w-3xl">
+      <PageHeader
+        title={isNew ? 'Add car' : 'Edit car'}
+        description="This content powers Featured Fleet and the /cars pages."
+        actions={
+          <Link to="/cars" className="admin-btn admin-btn--ghost">
+            Back to fleet
+          </Link>
+        }
+      />
 
-      <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-black/8 bg-white p-5">
+      <form onSubmit={onSubmit} className="admin-card space-y-4 p-5">
         <div className="overflow-hidden rounded-xl border border-black/8 bg-surface-container">
           <img src={previewSrc} alt="" className="h-48 w-full object-cover sm:h-56" />
           <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
@@ -385,11 +384,7 @@ export default function CarFormPage() {
 
         {error && <p className="text-sm text-red-700">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-xl bg-primary px-5 py-3 text-sm font-bold uppercase tracking-widest text-white disabled:opacity-60"
-        >
+        <button type="submit" disabled={saving} className="admin-btn admin-btn--primary disabled:opacity-60">
           {saving ? 'Saving…' : 'Save car'}
         </button>
       </form>
