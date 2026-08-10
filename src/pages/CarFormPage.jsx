@@ -17,6 +17,7 @@ const PENDING_IMAGE = '/uploads/fleet/pending.svg';
 
 const empty = {
   name: '',
+  slug: '',
   brand: '',
   model: '',
   year: new Date().getFullYear(),
@@ -372,6 +373,18 @@ export default function CarFormPage() {
                       onChange={update('name')}
                       placeholder="Audi A3 S-Line Berline - 2025"
                       required
+                    />
+                  </Field>
+                  <Field
+                    label="URL slug"
+                    className="car-fields__span-2"
+                    hint="Public link: /cars/your-slug — leave blank to auto-generate from the name."
+                  >
+                    <input
+                      className={inputClass}
+                      value={form.slug ?? ''}
+                      onChange={update('slug')}
+                      placeholder="audi-a3-s-line-berline-2025"
                     />
                   </Field>
                   <Field label="Brand">
