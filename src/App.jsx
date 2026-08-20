@@ -9,6 +9,9 @@ import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import PaymentsPage from './pages/PaymentsPage';
 import UsersPage from './pages/UsersPage';
+import WhyChooseUsPage from './pages/WhyChooseUsPage';
+import VehicleCategoriesPage from './pages/VehicleCategoriesPage';
+import SeoContentPage from './pages/SeoContentPage';
 
 export default function App() {
   return (
@@ -24,6 +27,9 @@ export default function App() {
               <Route path="cars/:id" element={<CarFormPage />} />
               <Route path="bookings" element={<BookingsPage />} />
               <Route path="payments" element={<PaymentsPage />} />
+              <Route path="content/vehicle-categories" element={<VehicleCategoriesPage />} />
+              <Route path="content/why-choose-us" element={<WhyChooseUsPage />} />
+              <Route path="content/seo" element={<SeoContentPage />} />
               <Route path="users" element={<UsersPage />} />
             </Route>
           </Route>

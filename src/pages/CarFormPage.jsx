@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import {
   CAR_TYPES,
   LOCATIONS,
+  POPULAR_BADGES,
   defaultBadgesForType,
   formatApiError,
   toStoragePath,
@@ -26,6 +27,9 @@ const empty = {
   deposit: 5000,
   dailyKm: 250,
   featured: false,
+  showInPopular: false,
+  popularBadge: '',
+  popularSort: 0,
   isActive: true,
   image: '',
   gallery: [],
@@ -194,6 +198,9 @@ export default function CarFormPage() {
         horsepower: Number(form.horsepower) || null,
         rating: Number(form.rating),
         reviews: Number(form.reviews),
+        showInPopular: Boolean(form.showInPopular),
+        popularBadge: form.popularBadge || null,
+        popularSort: Number(form.popularSort) || 0,
         image: toStoragePath(form.image) || PENDING_IMAGE,
         gallery: (Array.isArray(form.gallery) ? form.gallery : []).map(toStoragePath),
         highlights: textToList(highlights),
@@ -567,6 +574,17 @@ export default function CarFormPage() {
                   <small>Shows in the Featured Fleet carousel</small>
                 </span>
               </label>
+              <label className={`car-toggle ${form.showInPopular ? 'car-toggle--on' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={!!form.showInPopular}
+                  onChange={update('showInPopular')}
+                />
+                <span>
+                  <strong>Most Popular strip</strong>
+                  <small>Shows under the hero on the homepage</small>
+                </span>
+              </label>
               <label className={`car-toggle ${form.isActive ? 'car-toggle--on' : ''}`}>
                 <input type="checkbox" checked={!!form.isActive} onChange={update('isActive')} />
                 <span>
@@ -575,6 +593,46 @@ export default function CarFormPage() {
                 </span>
               </label>
             </div>
+
+            {form.showInPopular && (
+              <div className="car-fields car-fields--2 mt-4">
+                <label className="car-field">
+                  <span>Popular badge</span>
+                  <select
+                    value={form.popularBadge || ''}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        popularBadge: e.target.value || null,
+                      }))
+                    }
+                    className="admin-input"
+                  >
+                    <option value="">Auto / none</option>
+                    {POPULAR_BADGES.map((b) => (
+                      <option key={b.value} value={b.value}>
+                        {b.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="car-field">
+                  <span>Popular sort order</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.popularSort ?? 0}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        popularSort: Number(e.target.value) || 0,
+                      }))
+                    }
+                    className="admin-input"
+                  />
+                </label>
+              </div>
+            )}
           </Section>
         </div>
 

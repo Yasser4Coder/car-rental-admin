@@ -10,6 +10,9 @@ import {
   IconMenu,
   IconPayments,
   IconUsers,
+  IconVerified,
+  IconCategories,
+  IconSeo,
 } from './icons';
 
 const links = [
@@ -17,6 +20,9 @@ const links = [
   { to: '/cars', label: 'Fleet', end: false, icon: IconCars, hint: 'Inventory & photos' },
   { to: '/bookings', label: 'Bookings', end: false, icon: IconBookings, hint: 'Requests & status' },
   { to: '/payments', label: 'Payments', end: false, icon: IconPayments, hint: 'Cash & Stripe' },
+  { to: '/content/vehicle-categories', label: 'Categories', end: false, icon: IconCategories, hint: 'Homepage categories' },
+  { to: '/content/why-choose-us', label: 'Why us', end: false, icon: IconVerified, hint: 'Homepage benefits' },
+  { to: '/content/seo', label: 'SEO', end: false, icon: IconSeo, hint: 'Homepage SEO copy' },
   { to: '/users', label: 'Users', end: false, icon: IconUsers, hint: 'Clients & admins' },
 ];
 
@@ -26,6 +32,9 @@ function pageTitle(pathname) {
   if (pathname.startsWith('/cars')) return 'Fleet';
   if (pathname.startsWith('/bookings')) return 'Bookings';
   if (pathname.startsWith('/payments')) return 'Payments';
+  if (pathname.startsWith('/content/vehicle-categories')) return 'Vehicle categories';
+  if (pathname.startsWith('/content/why-choose-us')) return 'Why choose us';
+  if (pathname.startsWith('/content/seo')) return 'Homepage SEO';
   if (pathname.startsWith('/users')) return 'Users';
   return 'Dashboard';
 }

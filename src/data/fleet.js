@@ -40,6 +40,36 @@ export const BOOKING_PAYMENT_STATUSES = [
   { value: 'refunded', label: 'Refunded' },
 ];
 
+export const POPULAR_BADGES = [
+  { value: 'best_seller', label: 'Best Seller' },
+  { value: 'most_booked', label: 'Most Booked' },
+  { value: 'new_arrival', label: 'New Arrival' },
+  { value: 'limited_availability', label: 'Limited Availability' },
+];
+
+export const WHY_CHOOSE_ICONS = [
+  'local_shipping',
+  'payments',
+  'directions_car',
+  'support_agent',
+  'verified',
+  'speed',
+  'lock',
+  'event_available',
+  'check_circle',
+  'star',
+];
+
+export const CATEGORY_ICONS = [
+  'directions_car',
+  'airline_seat_recline_normal',
+  'verified',
+  'speed',
+  'star',
+  'bolt',
+  'local_shipping',
+];
+
 export function paymentStatusLabel(value) {
   return (
     BOOKING_PAYMENT_STATUSES.find((item) => item.value === value)?.label ||
